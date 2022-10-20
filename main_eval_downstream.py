@@ -54,7 +54,7 @@ parser.add_argument(
     type=str,
 )
 parser.add_argument("--gpu", type=int, default=0, help="gpu device id")
-parser.add_argument("--save_model", action="store_true", help="whether saving model")
+parser.add_argument("--save_model", action="store_false", help="whether saving model")
 parser.add_argument("--print_freq", default=50, type=int, help="print frequency")
 parser.add_argument("--subratio", default=1, type=float, help="dataset split ratio")
 
@@ -99,6 +99,14 @@ parser.add_argument(
     default=None,
     type=int,
     help="number of samples in the subset, balanced across classes",
+    required=False,
+)
+
+parser.add_argument(
+    "--optimizer",
+    default="SGD",
+    type=str,
+    help="optimizer to use for training",
     required=False,
 )
 
@@ -168,15 +176,31 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     decreasing_lr = list(map(int, args.decreasing_lr.split(",")))
-    optimizer = torch.optim.SGD(
-        model.parameters(),
-        args.lr,
-        momentum=args.momentum,
-        weight_decay=args.weight_decay,
-    )
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(
-        optimizer, milestones=decreasing_lr, gamma=0.1
-    )
+    if args.optimizer == "SGD":
+        optimizer = torch.optim.SGD(
+            model.parameters(),
+            args.lr,
+            momentum=args.momentum,
+            weight_decay=args.weight_decay,
+        )
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, milestones=decreasing_lr, gamma=0.1
+        )
+
+    elif args.optimizer == "Adam":
+        # final lr is 0.001
+        param_groups = [
+            {"params": model.base.parameters(), "lr": args.lr},
+            {"params": model.final.parameters(), "lr": 0.001},
+        ]
+        optimizer = torch.optim.Adam(param_groups)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, step_size=1, gamma=0.1
+        )
+
+    # log optimizer and scheduler settings to wandb
+    run.summary["optimizer_dict"] = optimizer.state_dict()
+    run.summary["scheduler_dict"] = scheduler.state_dict()
 
     all_result = {}
     all_result["train"] = []
