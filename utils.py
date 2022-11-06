@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from dataset import *
-from models.resnet import resnet18, resnet50, resnet152
+from models.resnet import resnet18, resnet34, resnet50, resnet152
 from pruning_utils import *
 
 __all__ = [
@@ -66,6 +66,8 @@ def setup_model_dataset(args):
     # prepare model
     if args.arch == "resnet18":
         model = resnet18(num_classes=classes)
+    elif args.arch == "resnet34":
+        model = resnet34(num_classes=classes)
     elif args.arch == "resnet50":
         model = resnet50(num_classes=classes)
     elif args.arch == "resnet152":

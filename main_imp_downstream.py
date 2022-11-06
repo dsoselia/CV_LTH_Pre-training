@@ -62,6 +62,24 @@ parser.add_argument('--conv1', action="store_true", help="whether pruning&loadin
 parser.add_argument('--fc', action="store_true", help="whether loading fc")
 parser.add_argument('--rewind_epoch', default=9, type=int, help='rewind checkpoint')
 
+parser.add_argument(
+    "--few_shot_ratio",
+    default=None,
+    type=float,
+    help="ratio of few shot data",
+    required=False,
+)
+
+parser.add_argument(
+    "--number_of_samples",
+    default=None,
+    type=int,
+    help="number of samples in the subset, balanced across classes",
+    required=False,
+)
+
+
+
 def main():
     best_sa = 0
     args = parser.parse_args()
@@ -95,13 +113,15 @@ def main():
 
     elif args.prune_type == 'pt_trans':
         print('pretrain tickets with {}'.format(args.pretrained))
-        pretrained_weight = torch.load(args.pretrained, map_location = torch.device('cuda:'+str(args.gpu)))
+        pretrained_weight = torch.load(args.pretrained)
         if 'state_dict' in pretrained_weight.keys():
             pretrained_weight = pretrained_weight['state_dict']
-
+        
+        model.cpu()
         load_weight_pt_trans(model, pretrained_weight, args)
         initalization = deepcopy(model.state_dict())
-
+        model.cuda()
+        
     elif args.prune_type == 'pt':
         initalization = None
     elif args.prune_type == 'rewind_lt':

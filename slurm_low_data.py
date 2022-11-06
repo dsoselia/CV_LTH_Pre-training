@@ -61,10 +61,10 @@ if not os.path.exists(output_dir):
 print("Output Directory: %s" % output_dir)
 
 weights_dir = (
-    "/fs/vulcan-projects/sailon_root/Sonaal/fsl/CV_LTH_Pre-training/imgnet_152"
+    "/fs/vulcan-projects/sailon_root/Sonaal/fsl/CV_LTH_Pre-training/imgnet_34"
 )
 
-datasets = ["cifar10", "cifar100", "svhn"]
+datasets = ["cifar10", "cifar100"]
 few_shot_ratios = [0.8, 0.6, 0.4, 0.2]
 sample_numbers = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
 params = sample_numbers
@@ -86,7 +86,7 @@ with open(f"{args.base_dir}/output/{args.env}/now.txt", "w") as nowfile, open(
                 now = datetime.now()
                 datetimestr = now.strftime("%m%d_%H%M:%S.%f")
                 name = f"{dataset}_{num}_{(n_samples)}"
-                cmd = f"python -u main_eval_downstream.py --dataset {dataset} --arch resnet152 --save_dir weights/{dataset}_{num}  --dict_key state_dict  --mask_dir {weights} --save_model --number_of_samples {(n_samples)}"
+                cmd = f"python -u main_eval_downstream.py --dataset {dataset} --arch resnet34 --save_dir weights/{dataset}_{num}  --dict_key state_dict  --mask_dir {weights} --save_model --number_of_samples {(n_samples)}"
 
                 print(count, name)
                 count += 1

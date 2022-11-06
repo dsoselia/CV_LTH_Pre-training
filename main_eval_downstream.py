@@ -115,7 +115,7 @@ def main():
     print(args)
 
     wandb_config = vars(args)
-    run = wandb.init(project="downstream", entity="828w", config=wandb_config)
+    run = wandb.init(project="downstream_v4", entity="828w", config=wandb_config)
     update_args(args, dict(run.config))
     if args.number_of_samples is None and args.few_shot_ratio is None:
         raise ValueError("Either number_of_samples or few_shot_ratio must be set.")
@@ -144,14 +144,14 @@ def main():
     run.summary["train_size"] = len(train_loader.dataset)
     run.summary["val_size"] = len(val_loader.dataset)
     run.summary["test_size"] = len(test_loader.dataset)
-    print(
-        "Dataset\n{} classes, {} train, {} val, {} test samples".format(
-            run.summary["number_of_classes"],
-            run.summary["train_size"],
-            run.summary["val_size"],
-            run.summary["test_size"],
-        )
-    )
+    # print(
+    #     "Dataset\n{} classes, {} train, {} val, {} test samples".format(
+    #         run.summary["number_of_classes"],
+    #         run.summary["train_size"],
+    #         run.summary["val_size"],
+    #         run.summary["test_size"],
+    #     )
+    # )
 
     if args.number_of_samples is not None:
         assert len(train_loader.dataset) - args.number_of_samples < 10
