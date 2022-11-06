@@ -36,6 +36,7 @@ def setup_model_dataset(args):
             data_dir=args.data,
             subset_ratio=args.few_shot_ratio,
             number_of_samples=args.number_of_samples,
+            balanced=args.balanced,
         )
     elif args.dataset == "cifar100":
         classes = 100
@@ -44,6 +45,7 @@ def setup_model_dataset(args):
             data_dir=args.data,
             subset_ratio=args.few_shot_ratio,
             number_of_samples=args.number_of_samples,
+            balanced=args.balanced,
         )
     elif args.dataset == "svhn":
         classes = 10
@@ -52,10 +54,27 @@ def setup_model_dataset(args):
             data_dir=args.data,
             subset_ratio=args.few_shot_ratio,
             number_of_samples=args.number_of_samples,
+            balanced=args.balanced,
         )
     elif args.dataset == "fmnist":
         classes = 10
         train_loader, val_loader, test_loader = fashionmnist_dataloaders(
+            batch_size=args.batch_size,
+            data_dir=args.data,
+            subset_ratio=args.few_shot_ratio,
+            balanced=args.balanced,
+        )
+    elif args.dataset == "caltech101":
+        classes = 101
+        train_loader, val_loader, test_loader = caltech101_dataloaders(
+            batch_size=args.batch_size,
+            data_dir=args.data,
+            subset_ratio=args.few_shot_ratio,
+        )
+
+    elif args.dataset == "caltech256":
+        classes = 256
+        train_loader, val_loader, test_loader = caltech256_dataloaders(
             batch_size=args.batch_size,
             data_dir=args.data,
             subset_ratio=args.few_shot_ratio,
