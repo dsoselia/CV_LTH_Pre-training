@@ -26,6 +26,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from utils import *
 from pruning_utils import *
 import wandb
+import json
 
 parser = argparse.ArgumentParser(description="PyTorch Evaluation Tickets")
 
@@ -189,18 +190,19 @@ def main():
 
     elif args.optimizer == "Adam":
         # final lr is 0.001
-        param_groups = [
-            {"params": model.base.parameters(), "lr": args.lr},
-            {"params": model.final.parameters(), "lr": 0.001},
-        ]
-        optimizer = torch.optim.Adam(param_groups)
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(
-            optimizer, step_size=1, gamma=0.1
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            args.lr,
+            weight_decay=args.weight_decay,
         )
 
-    # log optimizer and scheduler settings to wandb
-    run.summary["optimizer_dict"] = optimizer.state_dict()
-    run.summary["scheduler_dict"] = scheduler.state_dict()
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, milestones=decreasing_lr, gamma=0.1
+        )
+
+    # log optimizer and scheduler settings to wandb as json strings
+    run.summary["optimizer_dict"] = json.dumps(optimizer.state_dict())
+    run.summary["scheduler_dict"] = json.dumps(scheduler.state_dict())
 
     all_result = {}
     all_result["train"] = []
@@ -282,3 +284,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# python main_eval_downstream.py --arch=resnet152 --dataset=cifar10 --dict_key=state_dict --mask_dir=imgnet_152/6model_best.pth.tar --number_of_samples=10000 --save_dir=cifar10_1 --lr 0.01
