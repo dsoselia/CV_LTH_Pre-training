@@ -289,7 +289,7 @@ def caltech101_dataloaders(
     )
     train_transform = transforms.Compose(
         [   transforms.ToPILImage(),
-            transforms.Resize((224, 224)),
+            transforms.Resize((256, 256)),
             #transforms.CenterCrop(224),
             transforms.RandomCrop(224, padding=16),
             transforms.RandomHorizontalFlip(),
@@ -299,7 +299,7 @@ def caltech101_dataloaders(
     )
 
     test_transform = transforms.Compose(
-        [transforms.ToPILImage(),transforms.Resize((224, 224)),
+        [transforms.ToPILImage(),transforms.Resize((256, 256)),
             #transforms.CenterCrop(224),
             transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize]
     )
