@@ -234,11 +234,11 @@ def caltech256_dataloaders(
 
     elif number_of_samples is not None:
         if balanced:
-            train_data, val_data = get_balanced_subset(
-                train_data, val_data, number_of_samples, val_ratio=val_ratio
+            train_set, val_set = get_balanced_subset(
+                train_set, val_set, number_of_samples, val_ratio=val_ratio
             )
         else:
-            train_data = get_random_subset(train_data, number_of_samples)
+            train_set = get_random_subset(train_set, number_of_samples)
 
     train_loader = DataLoader(
         train_set,
@@ -304,10 +304,10 @@ def caltech101_dataloaders(
     elif number_of_samples is not None:
         if balanced:
             train_data, val_data = get_balanced_subset(
-                train_data, val_data, number_of_samples, val_ratio=val_ratio
+                train_set, val_set, number_of_samples, val_ratio=val_ratio
             )
         else:
-            train_data = get_random_subset(train_data, number_of_samples)
+            train_set = get_random_subset(train_set, number_of_samples)
 
     train_loader = DataLoader(
         train_set,
