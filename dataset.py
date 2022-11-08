@@ -211,8 +211,11 @@ def caltech256_dataloaders(
         mean=[0.5071, 0.4866, 0.4409], std=[0.2009, 0.1984, 0.2023]
     )
     train_transform = transforms.Compose(
-        [
-            transforms.CenterCrop(224),
+        [   
+            transforms.ToPILImage(),
+            transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -220,7 +223,9 @@ def caltech256_dataloaders(
     )
 
     val_transform = transforms.Compose(
-        transforms.CenterCrop(224), transforms.ToTensor(), normalize
+        transforms.ToPILImage(),transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize
     )
 
     test_transform = transforms.Compose([transforms.ToTensor(), normalize])
@@ -284,7 +289,9 @@ def caltech101_dataloaders(
     )
     train_transform = transforms.Compose(
         [   transforms.ToPILImage(),
-            transforms.CenterCrop(224),
+            transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -292,7 +299,9 @@ def caltech101_dataloaders(
     )
 
     test_transform = transforms.Compose(
-        [transforms.ToPILImage(),transforms.CenterCrop(224), transforms.ToTensor(), normalize]
+        [transforms.ToPILImage(),transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize]
     )
 
     train_set = CaltechDataset(x_train, y_train, train_transform)
