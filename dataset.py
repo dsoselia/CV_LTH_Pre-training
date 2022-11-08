@@ -7,7 +7,7 @@ from torchvision.datasets import (
     Caltech256,
     Caltech101,
 )
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset,Dataset
 import numpy as np
 from imutils import paths
 import os
@@ -212,7 +212,7 @@ def caltech256_dataloaders(
     )
     train_transform = transforms.Compose(
         [
-            transforms.RandomCrop(224, padding=16),
+            transforms.CenterCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -220,7 +220,7 @@ def caltech256_dataloaders(
     )
 
     val_transform = transforms.Compose(
-        transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize
+        transforms.CenterCrop(224), transforms.ToTensor(), normalize
     )
 
     test_transform = transforms.Compose([transforms.ToTensor(), normalize])
@@ -278,12 +278,13 @@ def caltech101_dataloaders(
         f"x_train examples: {x_train.shape}\nx_test examples: {x_test.shape}\nx_val examples: {x_val.shape}"
     )
 
+    
     normalize = transforms.Normalize(
         mean=[0.5071, 0.4866, 0.4409], std=[0.2009, 0.1984, 0.2023]
     )
     train_transform = transforms.Compose(
-        [
-            transforms.RandomCrop(224, padding=16),
+        [   transforms.ToPILImage(),
+            transforms.CenterCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -291,7 +292,7 @@ def caltech101_dataloaders(
     )
 
     test_transform = transforms.Compose(
-        [transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize]
+        [transforms.ToPILImage(),transforms.CenterCrop(224), transforms.ToTensor(), normalize]
     )
 
     train_set = CaltechDataset(x_train, y_train, train_transform)
@@ -478,7 +479,7 @@ class CaltechDataset(Dataset):
         if self.transforms:
             data = self.transforms(data)
 
-        if self.y is not None:
+        if self.labels is not None:
             return (data, self.labels[index])
         else:
             return data
