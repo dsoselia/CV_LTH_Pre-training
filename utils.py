@@ -117,6 +117,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             )
 
         image = image.cuda()
+        label_dict = {}
+        int_labels = []
+        for i in range(len(target)):
+            label_dict[i] = target[i]
+            int_labels.append(i)
+        target = torch.tensor(int_labels)
         target = target.cuda()
 
         # compute output

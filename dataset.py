@@ -7,7 +7,7 @@ from torchvision.datasets import (
     Caltech256,
     Caltech101,
 )
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset,Dataset
 import numpy as np
 from imutils import paths
 import os
@@ -211,7 +211,10 @@ def caltech256_dataloaders(
         mean=[0.5071, 0.4866, 0.4409], std=[0.2009, 0.1984, 0.2023]
     )
     train_transform = transforms.Compose(
-        [
+        [   
+            transforms.ToPILImage(),
+            transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
             transforms.RandomCrop(224, padding=16),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
@@ -220,7 +223,9 @@ def caltech256_dataloaders(
     )
 
     val_transform = transforms.Compose(
-        transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize
+        transforms.ToPILImage(),transforms.Resize((224, 224)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize
     )
 
     test_transform = transforms.Compose([transforms.ToTensor(), normalize])
@@ -234,11 +239,11 @@ def caltech256_dataloaders(
 
     elif number_of_samples is not None:
         if balanced:
-            train_data, val_data = get_balanced_subset(
-                train_data, val_data, number_of_samples, val_ratio=val_ratio
+            train_set, val_set = get_balanced_subset(
+                train_set, val_set, number_of_samples, val_ratio=val_ratio
             )
         else:
-            train_data = get_random_subset(train_data, number_of_samples)
+            train_set = get_random_subset(train_set, number_of_samples)
 
     train_loader = DataLoader(
         train_set,
@@ -278,11 +283,14 @@ def caltech101_dataloaders(
         f"x_train examples: {x_train.shape}\nx_test examples: {x_test.shape}\nx_val examples: {x_val.shape}"
     )
 
+    
     normalize = transforms.Normalize(
         mean=[0.5071, 0.4866, 0.4409], std=[0.2009, 0.1984, 0.2023]
     )
     train_transform = transforms.Compose(
-        [
+        [   transforms.ToPILImage(),
+            transforms.Resize((256, 256)),
+            #transforms.CenterCrop(224),
             transforms.RandomCrop(224, padding=16),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
@@ -291,7 +299,9 @@ def caltech101_dataloaders(
     )
 
     test_transform = transforms.Compose(
-        [transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize]
+        [transforms.ToPILImage(),transforms.Resize((256, 256)),
+            #transforms.CenterCrop(224),
+            transforms.RandomCrop(224, padding=16), transforms.ToTensor(), normalize]
     )
 
     train_set = CaltechDataset(x_train, y_train, train_transform)
@@ -304,10 +314,10 @@ def caltech101_dataloaders(
     elif number_of_samples is not None:
         if balanced:
             train_data, val_data = get_balanced_subset(
-                train_data, val_data, number_of_samples, val_ratio=val_ratio
+                train_set, val_set, number_of_samples, val_ratio=val_ratio
             )
         else:
-            train_data = get_random_subset(train_data, number_of_samples)
+            train_set = get_random_subset(train_set, number_of_samples)
 
     train_loader = DataLoader(
         train_set,
@@ -478,7 +488,7 @@ class CaltechDataset(Dataset):
         if self.transforms:
             data = self.transforms(data)
 
-        if self.y is not None:
+        if self.labels is not None:
             return (data, self.labels[index])
         else:
             return data

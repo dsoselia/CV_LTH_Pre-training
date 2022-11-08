@@ -119,6 +119,9 @@ parser.add_argument(
 )
 
 
+parser.add_argument('--resume', default='', type=str, metavar='PATH',
+                    help='path to latest checkpoint (default: none)')
+
 def update_args(args, config_dict):
     for key, val in config_dict.items():
         setattr(args, key, val)
