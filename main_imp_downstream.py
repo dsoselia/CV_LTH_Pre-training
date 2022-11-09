@@ -78,6 +78,12 @@ parser.add_argument(
     required=False,
 )
 
+parser.add_argument(
+    "--balanced",
+    action="store_true",
+    help="whether loading all weight in pretrained model",
+)
+
 
 
 def main():
@@ -103,6 +109,16 @@ def main():
     # prepare dataset 
     model, train_loader, val_loader, test_loader = setup_model_dataset(args)
     model.cuda()
+
+    if 'caltech' in args.dataset:
+        print("Using Model from Pytorch Transforms")
+        import torchvision.models as models
+        model_names = sorted(name for name in models.__dict__
+            if name.islower() and not name.startswith("__")
+            and callable(models.__dict__[name]))
+        
+        model = models.__dict__[args.arch](pretrained=args.pretrained)
+        model.cuda()
 
     criterion = nn.CrossEntropyLoss()
     decreasing_lr = list(map(int, args.decreasing_lr.split(',')))
