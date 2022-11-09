@@ -1,6 +1,5 @@
 from torchvision import transforms
-from torchvision.datasets import CIFAR10, CIFAR100, SVHN, FashionMNIST
-from Caltech import Caltech256,Caltech101
+from torchvision.datasets import CIFAR10, CIFAR100, SVHN, FashionMNIST, Caltech256,Caltech101
 from torch.utils.data import DataLoader, Subset
 import numpy as np
 import random
