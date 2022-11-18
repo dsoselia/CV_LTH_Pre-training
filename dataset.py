@@ -1,8 +1,16 @@
 from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, SVHN, FashionMNIST, Caltech256,Caltech101
 from torch.utils.data import DataLoader, Subset
+
+
+from torch.utils.data import DataLoader, Subset,Dataset
 import numpy as np
 import random
+from imutils import paths
+import os
+import cv2
+from sklearn.model_selection import train_test_split
+
 
 class FewShotSubset(Subset):
     def __init__(self, dataset, indices):
@@ -16,7 +24,7 @@ __all__ = [
     "svhn_dataloaders",
     "fashionmnist_dataloaders",
     "caltech101_dataloaders",
-    "caltech256_dataloaders"
+    "caltech256_dataloaders",
 ]
 
 
@@ -34,10 +42,7 @@ def sample_dataset(dataset, per):
     return dataset
 
 
-def get_balanced_subset(dataset, number_of_samples, val_ratio=0.2):
-    number_of_validation_samples = int(number_of_samples / (1 - val_ratio) * val_ratio)
-    if number_of_validation_samples + number_of_samples > len(dataset):
-        raise ValueError("number of samples is too large")
+def get_balanced_subset(dataset, number_of_samples):
     unique_labels = np.unique(dataset.targets)
     train_idxs = []
     for label in unique_labels:
@@ -50,12 +55,11 @@ def get_balanced_subset(dataset, number_of_samples, val_ratio=0.2):
     return dataset_train
 
 
-def get_random_subset(dataset, number_of_samples, val_ratio=0.2):
+def get_random_subset(dataset, number_of_samples):
     if number_of_samples > len(dataset):
         raise ValueError("number of samples is too large")
-    idxs = np.random.choice(len(dataset) - 10000, number_of_samples, replace=False)
-    # dataset_train = FewShotSubset(dataset, idxs)
-    dataset_train = Subset(dataset, list(idxs))
+    idxs = np.random.choice(len(dataset), number_of_samples, replace=False)
+    dataset_train = FewShotSubset(dataset, idxs)
     return dataset_train
 
 
@@ -89,13 +93,13 @@ def cifar10_dataloaders(
         )
         val_set = CIFAR10(data_dir, train=True, transform=test_transform, download=True)
         val_set = Subset(val_set, list(range(40000, 50000)))
-        # train_set = Subset(train_set, list(range(4000)))
+        train_set = Subset(train_set, list(range(40000)))
         if balanced:
-            train_set = get_balanced_subset(
+            train_set, val_set = get_balanced_subset(
                 train_set, number_of_samples
             )
         else:
-            train_set = get_random_subset(train_set, number_of_samples, val_ratio=0.2)
+            train_set = get_random_subset(train_set, number_of_samples)
 
     test_set = CIFAR10(data_dir, train=False, transform=test_transform, download=True)
 
@@ -150,15 +154,13 @@ def cifar100_dataloaders(
             data_dir, train=True, transform=test_transform, download=True
         )
         val_set = Subset(val_set, list(range(40000, 50000)))
-        # train_set = Subset(train_set, list(range(40000)))
+        train_set = Subset(train_set, list(range(40000)))
         if balanced:
             train_set, val_set = get_balanced_subset(
-                train_set, val_set, number_of_samples, val_ratio=val_ratio
+                train_set, number_of_samples
             )
         else:
-            train_set = get_random_subset(
-                train_set, number_of_samples, val_ratio=val_ratio
-            )
+            train_set, val_set = get_random_subset(train_set, number_of_samples)
 
     test_set = CIFAR100(data_dir, train=False, transform=test_transform, download=True)
 
@@ -188,6 +190,7 @@ def caltech256_dataloaders(
     val_ratio=0.2,
     balanced=False
 ):
+    raise ValueError("caltech256 is not supported yet")
 
     normalize = transforms.Normalize(
         mean=[0.5071, 0.4866, 0.4409], std=[0.2009, 0.1984, 0.2023]

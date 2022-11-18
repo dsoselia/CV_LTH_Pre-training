@@ -104,7 +104,7 @@ def setup_model_dataset(args):
     return model, train_loader, val_loader, test_loader
 
 
-def train(train_loader, model, criterion, optimizer, epoch, args):
+def train(train_loader, model, criterion, optimizer, epoch, args, run = None):
 
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -151,7 +151,13 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             )
             start = time.time()
 
+
     print("train_accuracy {top1.avg:.3f}".format(top1=top1))
+    if run is not None:
+        try:
+            run.log({"run_loss_progress": losses.avg})
+        except:
+            run.log({"run_loss_progress": None})
 
     return top1.avg
 

@@ -23,6 +23,8 @@ import torchvision.models as models
 import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+import wandb
+
 from utils import *
 from pruning_utils import *
 
@@ -85,11 +87,19 @@ parser.add_argument(
 )
 
 
+def update_args(args, config_dict):
+    for key, val in config_dict.items():
+        setattr(args, key, val)
+
 
 def main():
     best_sa = 0
     args = parser.parse_args()
     print(args)
+
+    wandb_config = vars(args)
+    run = wandb.init(project="imp_downstream", entity="828w", config=wandb_config)
+    update_args(args, dict(run.config))
 
     print('*'*50)
     print('Dataset: {}'.format(args.dataset))
@@ -152,6 +162,7 @@ def main():
 
     if args.resume:
         print('resume from checkpoint')
+        run.log({"resume": True})
         checkpoint = torch.load(args.checkpoint, map_location = torch.device('cuda:'+str(args.gpu)))
         best_sa = checkpoint['best_sa']
         start_epoch = checkpoint['epoch']
@@ -192,7 +203,7 @@ def main():
 
             print(optimizer.state_dict()['param_groups'][0]['lr'])
 
-            acc = train(train_loader, model, criterion, optimizer, epoch, args)
+            acc = train(train_loader, model, criterion, optimizer, epoch, args, run)
 
             if state == 0:
                 if epoch == args.rewind_epoch-1:
@@ -210,10 +221,13 @@ def main():
             all_result['train'].append(acc)
             all_result['ta'].append(tacc)
             all_result['test_ta'].append(test_tacc)
+            
 
             # remember best prec@1 and save checkpoint
             is_best_sa = tacc  > best_sa
             best_sa = max(tacc, best_sa)
+
+            run.log({"epoch": epoch, "train_acc": acc, "val_acc": tacc, "test_acc": test_tacc, "best_running_acc": best_sa, "state": state})
 
             save_checkpoint({
                 'state': state,
@@ -237,10 +251,13 @@ def main():
         check_sparsity(model, conv1=args.conv1)
         print('* best SA={}'.format(all_result['test_ta'][np.argmax(np.array(all_result['ta']))]))
 
+        run.log({"best_test_acc": all_result['test_ta'][np.argmax(np.array(all_result['ta']))]})
+
         all_result = {}
         all_result['train'] = []
         all_result['test_ta'] = []
         all_result['ta'] = []
+        
 
         best_sa = 0
         start_epoch = 0
@@ -265,6 +282,9 @@ def main():
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=decreasing_lr, gamma=0.1)
+
+    # end run
+    run.finish()
 
 if __name__ == '__main__':
     main()
