@@ -203,7 +203,7 @@ def main():
 
             print(optimizer.state_dict()['param_groups'][0]['lr'])
 
-            acc = train(train_loader, model, criterion, optimizer, epoch, args)
+            acc = train(train_loader, model, criterion, optimizer, epoch, args, run)
 
             if state == 0:
                 if epoch == args.rewind_epoch-1:
@@ -282,6 +282,9 @@ def main():
                                     momentum=args.momentum,
                                     weight_decay=args.weight_decay)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=decreasing_lr, gamma=0.1)
+
+    # end run
+    run.finish()
 
 if __name__ == '__main__':
     main()
